@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToDo app</title>
+</head>
+
+<script>
+  function insertTodosInDOM(data) {
+    const todosContainer = document.getElementById("main-area");
+
+    for (let index = 0; index < data.length; index++) {
+      const dataDiv = document.createElement("div");
+      const dataTitleHeading = document.createElement("h3");
+      const dataDescriptionSpan = document.createElement("p");
+      const dataDeleteButton = document.createElement("button");
+
+      dataTitleHeading.innerHTML = data[index].title;
+      dataDescriptionSpan.innerHTML = data[index].description;
+      dataDeleteButton.innerText = "Delete todo"
+      dataDeleteButton.setAttribute("onclick", "deleteTodo(" + data[index].id + ")")
+
+      dataDiv.setAttribute("id", data[index].id);
+      dataDiv.appendChild(dataTitleHeading);
+      dataDiv.appendChild(dataDescriptionSpan);
+      dataDiv.appendChild(dataDeleteButton);
+
+      todosContainer.appendChild(dataDiv);
+    }
+  }
+
+  function getTodo() {
+    fetch("http://localhost:3000/todos")
+      .then(resp => resp.json())
+      .then(data => insertTodosInDOM(data));
+  }
+
+  function addTodo() {
+    const title = document.querySelector("#title");
+    const description = document.querySelector("#description");
+
+    fetch("http://localhost:3000/todos", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title.value,
+        description: description.value,
+      })
+    })
+      .then(resp => resp.json())
+      .then(data => {
+        const todosContainer = document.getElementById("main-area");
+        const dataDiv = document.createElement("div");
+        const dataTitleHeading = document.createElement("h3");
+        const dataDescriptionSpan = document.createElement("p");
+        const dataDeleteButton = document.createElement("button");
+
+        dataTitleHeading.innerHTML = data.title;
+        dataDescriptionSpan.innerHTML = data.description;
+        dataDeleteButton.innerText = "Delete todo"
+        dataDeleteButton.setAttribute("onclick", "deleteTodo(" + data.id + ")")
+        
+        dataDiv.setAttribute("id", data.id);
+        dataDiv.appendChild(dataTitleHeading);
+        dataDiv.appendChild(dataDescriptionSpan);
+        dataDiv.appendChild(dataDeleteButton);
+
+        todosContainer.appendChild(dataDiv);
+      })
+  }
+
+  function deleteTodo(id) {
+    fetch(`http://localhost:3000/todos`, {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then(resp => resp.json())
+      .then(data => {
+        const todosContainer = document.getElementById("main-area");
+        const deletedTodo = document.getElementById(id)
+        todosContainer.removeChild(deletedTodo)
+      })
+  }
+</script>
+
+<body>
+  <input type="text" placeholder="Enter title" id="title">
+  <br>
+  <input type="text" placeholder="Enter description" id="description">
+  <br>
+  <button onclick="addTodo()">Add Todo</button>
+  <br>
+  <button onclick="getTodo()">Get Todo</button>
+  <div id="main-area"></div>
+</body>
+
+</html>
